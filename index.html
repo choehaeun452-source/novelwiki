@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>소설위키</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f0f2f5;
+  --white:#fff;
+  --border:#d0d5de;
+  --border-light:#e5e8ef;
+  --text:#1a1c22;
+  --text-sub:#52596e;
+  --text-dim:#8a93a8;
+  --accent:#1f5fcc;
+  --accent-bg:#dbeafe;
+  --hd:#1e2a3c;
+  --sidebar-bg:#f6f8fc;
+  --sec-bg:#edf0f7;
+  --sec-hover:#e2e6f0;
+  --toc-bg:#f7f9fc;
+  --toc-border:#c8d0e0;
+  --edit:#8898b8;
+  --tag:#e4e8f5;
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.8;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+
+/* TOP BAR */
+#topbar{background:var(--hd);height:46px;display:flex;align-items:center;padding:0 14px;gap:12px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.3);z-index:100;}
+.logo{font-family:'Noto Serif KR',serif;font-size:17px;font-weight:700;color:#fff;cursor:pointer;white-space:nowrap;}
+.logo span{color:#60a5fa;}
+.top-search{flex:1;max-width:360px;display:flex;gap:4px;}
+.top-search input{flex:1;background:#263348;border:1px solid #3a4e68;border-radius:3px;color:#d0dae8;padding:4px 9px;font-size:13px;font-family:inherit;outline:none;}
+.top-search input::placeholder{color:#5a6a88;}
+.top-search input:focus{border-color:#60a5fa;}
+.top-search button{background:#2060c8;border:none;border-radius:3px;color:#fff;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit;}
+.top-btn{background:none;border:1px solid #3a4e68;border-radius:3px;color:#90a8c8;padding:4px 11px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.top-btn:hover{background:#263348;color:#fff;}
+.top-btn.pri{background:#2060c8;border-color:#2060c8;color:#fff;}
+.top-btn.pri:hover{background:#1a50b0;}
+#api-ind{font-size:11px;color:#60a5fa;white-space:nowrap;}
+
+/* LAYOUT */
+#layout{display:flex;flex:1;overflow:hidden;}
+
+/* SIDEBAR */
+#sidebar{width:198px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+#sb-head{padding:9px 12px 7px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+#sb-head span{font-size:12px;font-weight:700;color:var(--text-sub);letter-spacing:.3px;}
+#sb-add{background:var(--accent);border:none;border-radius:3px;color:#fff;font-size:11px;padding:3px 8px;cursor:pointer;font-family:inherit;}
+#sb-add:hover{background:#1a50b0;}
+#wiki-list{flex:1;overflow-y:auto;padding:5px 0;}
+.wi{display:flex;align-items:center;padding:7px 12px;cursor:pointer;gap:6px;border-left:3px solid transparent;}
+.wi:hover{background:var(--sec-bg);}
+.wi.active{background:var(--accent-bg);border-left-color:var(--accent);}
+.wi-name{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wi.active .wi-name{color:var(--accent);font-weight:500;}
+.wi-del{display:none;background:none;border:none;color:#c0392b;font-size:15px;cursor:pointer;padding:0 2px;line-height:1;}
+.wi:hover .wi-del{display:block;}
+.sb-empty{padding:20px 12px;text-align:center;color:var(--text-dim);font-size:12px;}
+
+/* WIKI AREA */
+#wiki-area{flex:1;overflow-y:auto;background:var(--white);border-right:1px solid var(--border);}
+#wiki-wrap{max-width:800px;margin:0 auto;padding:22px 28px 80px;}
+.page-title{font-family:'Noto Serif KR',serif;font-size:25px;font-weight:700;border-bottom:2px solid var(--border);padding-bottom:6px;margin-bottom:4px;}
+.page-meta{font-size:12px;color:var(--text-dim);margin:5px 0 16px;display:flex;gap:14px;flex-wrap:wrap;}
+
+/* TOC */
+.toc-box{background:var(--toc-bg);border:1px solid var(--toc-border);display:inline-block;min-width:190px;max-width:310px;margin-bottom:20px;font-size:13px;}
+.toc-hd{background:var(--sec-bg);border-bottom:1px solid var(--toc-border);padding:5px 12px;font-weight:700;display:flex;justify-content:space-between;align-items:center;}
+.toc-hd button{background:none;border:none;color:var(--accent);font-size:12px;cursor:pointer;font-family:inherit;}
+.toc-bd{padding:8px 14px 10px;}
+.toc-bd ol{padding-left:18px;}
+.toc-bd li{line-height:2;}
+.toc-bd a{color:var(--accent);}
+.toc-bd a:hover{text-decoration:underline;}
+
+/* SECTIONS */
+.wsec{margin-bottom:1px;}
+.wsec-hd{background:var(--sec-bg);border-top:1px solid var(--border-light);padding:5px 10px 5px 4px;cursor:pointer;display:flex;align-items:center;user-select:none;}
+.wsec-hd:hover{background:var(--sec-hover);}
+.wsec-arr{color:var(--text-dim);font-size:13px;width:22px;text-align:center;flex-shrink:0;font-style:normal;}
+.wsec-num{color:var(--text-sub);font-weight:400;font-size:14px;margin-right:4px;}
+.wsec-title{font-family:'Noto Serif KR',serif;font-size:15px;font-weight:700;flex:1;}
+.wsec-edit{background:none;border:1px solid var(--border);border-radius:2px;color:var(--edit);font-size:11px;padding:1px 7px;cursor:pointer;font-family:inherit;flex-shrink:0;}
+.wsec-edit:hover{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);}
+.wsec-body{padding:10px 2px 6px;}
+.wsec-body.hide{display:none;}
+
+/* SUBSEC */
+.wssec{margin:10px 0 4px;}
+.wssec-hd{display:flex;align-items:baseline;gap:6px;border-bottom:1px solid var(--border-light);padding-bottom:2px;margin-bottom:5px;}
+.wssec-num{color:var(--text-dim);font-size:13px;}
+.wssec-title{font-size:14px;font-weight:700;}
+
+/* CONTENT */
+.wp{margin-bottom:9px;font-size:14px;}
+.wul{margin:5px 0 9px 20px;}
+.wul li{margin-bottom:3px;font-size:14px;}
+.wtag{display:inline-block;background:var(--tag);color:var(--text-sub);border-radius:2px;padding:1px 7px;font-size:12px;margin:2px 2px;}
+.wlink{color:var(--accent);cursor:pointer;}
+.wlink:hover{text-decoration:underline;}
+.spoiler{background:var(--text);color:var(--text);border-radius:2px;padding:0 5px;cursor:pointer;transition:.2s;}
+.spoiler.open{background:var(--tag);color:var(--text);}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px;margin:8px 0;}
+.ccard{border:1px solid var(--border);padding:10px;cursor:pointer;background:#fff;transition:.15s;}
+.ccard:hover{border-color:var(--accent);background:var(--accent-bg);}
+.ccard .cn{font-weight:700;font-size:13px;margin-bottom:2px;}
+.ccard .cr{font-size:11px;color:var(--text-dim);}
+.ccard .cd{font-size:12px;color:var(--text-sub);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.tl-wrap{padding-left:20px;border-left:2px solid var(--border-light);margin:8px 0;}
+.tl-item{position:relative;margin-bottom:12px;}
+.tl-dot{position:absolute;left:-25px;top:5px;width:9px;height:9px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 0 0 1px var(--accent);}
+.tl-when{font-size:11px;color:var(--text-dim);}
+.tl-text{font-size:13px;}
+
+/* EMPTY */
+.empty-st{text-align:center;padding:60px 20px;color:var(--text-dim);}
+.empty-st .ico{font-size:44px;margin-bottom:12px;}
+.empty-st h3{font-size:18px;color:var(--text-sub);margin-bottom:8px;font-family:'Noto Serif KR',serif;}
+.empty-st p{font-size:13px;line-height:1.7;}
+
+/* INPUT PANEL */
+#ipanel{width:295px;flex-shrink:0;background:#f8fafc;border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:width .2s;}
+#ipanel.collapsed{width:36px;}
+#ipanel-hd{background:var(--hd);padding:9px 12px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+#ipanel-hd .lbl{color:#e0e8f5;font-size:13px;font-weight:500;}
+#ipanel.collapsed #ipanel-hd .lbl{display:none;}
+#ptoggle{background:none;border:1px solid #3a4e68;border-radius:3px;color:#90a8c8;font-size:11px;padding:2px 7px;cursor:pointer;font-family:inherit;}
+#ptoggle:hover{background:#263348;}
+#ipanel-inner{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+#ipanel.collapsed #ipanel-inner{display:none;}
+
+/* API */
+#api-sec{padding:9px 12px;border-bottom:1px solid var(--border);background:#fff;flex-shrink:0;}
+#api-sec label{font-size:11px;font-weight:700;color:var(--text-sub);display:block;margin-bottom:4px;}
+.api-row{display:flex;gap:4px;}
+#api-inp{flex:1;border:1px solid var(--border);border-radius:3px;padding:4px 7px;font-size:12px;font-family:inherit;outline:none;}
+#api-inp:focus{border-color:var(--accent);}
+#api-save{background:var(--accent);border:none;border-radius:3px;color:#fff;padding:4px 9px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+#api-msg{font-size:11px;color:#27ae60;margin-top:3px;height:13px;}
+
+/* DUMP */
+#dump-sec{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:10px 12px;gap:7px;}
+#dump-sec .lbl2{font-size:12px;font-weight:700;color:var(--text-sub);}
+#dump-hint{font-size:11px;color:var(--text-dim);margin-top:-4px;line-height:1.5;}
+#dump-ta{flex:1;border:1px solid var(--border);border-radius:3px;padding:9px;font-size:13px;font-family:inherit;line-height:1.7;resize:none;outline:none;color:var(--text);background:#fff;-webkit-ime-mode:auto;ime-mode:auto;}
+#dump-ta:focus{border-color:var(--accent);}
+#dump-ta::placeholder{color:var(--text-dim);}
+.mode-row{display:flex;gap:4px;flex-wrap:wrap;}
+.mchip{background:var(--tag);border:1px solid var(--border);border-radius:11px;padding:2px 9px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--text-sub);}
+.mchip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.mchip:hover:not(.on){background:var(--accent-bg);}
+#send-btn{background:var(--accent);border:none;border-radius:3px;color:#fff;padding:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;}
+#send-btn:hover{background:#1a50b0;}
+#send-btn:disabled{background:var(--border);cursor:not-allowed;}
+#proc{display:none;align-items:center;gap:7px;font-size:12px;color:var(--accent);background:var(--accent-bg);border-radius:3px;padding:7px 10px;}
+#proc.show{display:flex;}
+.spin{width:13px;height:13px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* LOG */
+#log-sec{padding:0 12px 10px;flex-shrink:0;max-height:110px;overflow-y:auto;border-top:1px solid var(--border-light);}
+#log-sec h4{font-size:11px;font-weight:700;color:var(--text-dim);margin:7px 0 4px;}
+.log-row{font-size:11px;color:var(--text-dim);border-bottom:1px solid var(--border-light);padding:3px 0;display:flex;justify-content:space-between;gap:6px;}
+.log-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+
+/* MODAL */
+#moverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:500;align-items:center;justify-content:center;}
+#moverlay.show{display:flex;}
+#modal{background:#fff;border-radius:4px;padding:24px;width:330px;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+#modal h3{font-family:'Noto Serif KR',serif;font-size:17px;margin-bottom:12px;}
+#modal input{width:100%;border:1px solid var(--border);border-radius:3px;padding:7px 10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;}
+#modal input:focus{border-color:var(--accent);}
+.mbtns{display:flex;gap:8px;justify-content:flex-end;}
+.mbtns button{border-radius:3px;padding:6px 16px;font-size:13px;cursor:pointer;font-family:inherit;border:1px solid var(--border);}
+.mbtns .cancel{background:#fff;color:var(--text-sub);}
+.mbtns .confirm{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* CHAR MODAL */
+#cdoverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;align-items:flex-start;justify-content:center;padding-top:60px;}
+#cdoverlay.show{display:flex;}
+#cdinner{background:#fff;width:540px;max-height:78vh;overflow-y:auto;border-radius:4px;box-shadow:0 8px 32px rgba(0,0,0,.2);}
+.cd-hd{background:var(--hd);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+.cd-hd h2{color:#fff;font-family:'Noto Serif KR',serif;font-size:18px;}
+.cd-hd button{background:none;border:none;color:#90a8c8;font-size:20px;cursor:pointer;}
+.cd-bd{padding:16px;}
+.cd-row{display:flex;border-bottom:1px solid var(--border-light);}
+.cd-row:last-child{border:none;}
+.cd-k{width:75px;flex-shrink:0;font-weight:500;color:var(--text-sub);font-size:13px;padding:6px 8px;}
+.cd-v{flex:1;font-size:13px;padding:6px 8px;}
+
+/* EDIT MODAL */
+#editoverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center;padding:20px;}
+#editoverlay.show{display:flex;}
+#editinner{background:#fff;width:100%;max-width:640px;max-height:88vh;border-radius:4px;box-shadow:0 8px 32px rgba(0,0,0,.25);display:flex;flex-direction:column;}
+.edit-hd{background:var(--hd);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.edit-hd h2{color:#fff;font-family:'Noto Serif KR',serif;font-size:17px;}
+.edit-hd button{background:none;border:none;color:#90a8c8;font-size:20px;cursor:pointer;}
+.edit-bd{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;}
+.edit-field{display:flex;flex-direction:column;gap:4px;}
+.edit-field label{font-size:12px;font-weight:700;color:var(--text-sub);}
+.edit-field input,.edit-field textarea{border:1px solid var(--border);border-radius:3px;padding:7px 9px;font-size:13px;font-family:inherit;outline:none;color:var(--text);}
+.edit-field input:focus,.edit-field textarea:focus{border-color:var(--accent);}
+.edit-field textarea{resize:vertical;min-height:70px;line-height:1.6;}
+.edit-ft{padding:12px 16px;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0;}
+.edit-ft button{border-radius:3px;padding:7px 18px;font-size:13px;cursor:pointer;font-family:inherit;border:1px solid var(--border);}
+.edit-ft .cancel{background:#fff;color:var(--text-sub);}
+.edit-ft .save{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500;}
+.edit-ft .save:hover{background:#1a50b0;}
+.edit-ft .del{background:#fff;border-color:#e74c3c;color:#e74c3c;margin-right:auto;}
+.edit-ft .del:hover{background:#fdf0ef;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#c0c8d8;border-radius:3px;}
+
+/* SEARCH DROPDOWN */
+.top-search{position:relative;}
+#srch-dropdown{
+  display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:#fff;border:1px solid var(--border);border-radius:3px;
+  box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:500;max-height:320px;overflow-y:auto;
+}
+#srch-dropdown.show{display:block;}
+.sd-group{border-bottom:1px solid var(--border-light);}
+.sd-group:last-child{border-bottom:none;}
+.sd-group-label{font-size:11px;font-weight:700;color:var(--text-dim);padding:6px 12px 3px;background:var(--sec-bg);letter-spacing:.3px;}
+.sd-item{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;font-size:13px;}
+.sd-item:hover{background:var(--accent-bg);}
+.sd-item .sd-name{font-weight:500;color:var(--text);}
+.sd-item .sd-desc{color:var(--text-dim);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+.sd-empty{padding:12px;text-align:center;font-size:13px;color:var(--text-dim);}
+
+/* EDIT MODAL */
+#eoverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:center;justify-content:center;padding:20px;}
+#eoverlay.show{display:flex;}
+#emodal{background:#fff;border-radius:4px;width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.25);}
+.em-hd{background:var(--hd);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.em-hd h2{color:#fff;font-family:'Noto Serif KR',serif;font-size:16px;}
+.em-hd button{background:none;border:none;color:#90a8c8;font-size:20px;cursor:pointer;}
+.em-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:11px;}
+.em-ft{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
+.em-ft button{border-radius:3px;padding:6px 18px;font-size:13px;cursor:pointer;font-family:inherit;border:1px solid var(--border);}
+.em-ft .esave{background:var(--accent);border-color:var(--accent);color:#fff;}
+.em-ft .esave:hover{background:#1a50b0;}
+.em-ft .ecancel{background:#fff;color:var(--text-sub);}
+.ef-row{display:flex;flex-direction:column;gap:4px;}
+.ef-row label{font-size:11px;font-weight:700;color:var(--text-sub);}
+.ef-row input,.ef-row textarea{border:1px solid var(--border);border-radius:3px;padding:6px 9px;font-size:13px;font-family:inherit;outline:none;color:var(--text);}
+.ef-row input:focus,.ef-row textarea:focus{border-color:var(--accent);}
+.ef-row textarea{resize:vertical;min-height:75px;line-height:1.6;}
+.ef-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ef-li{display:flex;gap:6px;align-items:center;margin-bottom:5px;}
+.ef-li input{flex:1;border:1px solid var(--border);border-radius:3px;padding:5px 8px;font-size:13px;font-family:inherit;outline:none;}
+.ef-li input:focus{border-color:var(--accent);}
+.ef-del{background:none;border:1px solid #ecc;border-radius:3px;color:#c0392b;font-size:13px;padding:3px 8px;cursor:pointer;}
+.ef-add{background:var(--tag);border:1px solid var(--border);border-radius:3px;font-size:12px;padding:3px 10px;cursor:pointer;font-family:inherit;color:var(--text-sub);}
+.ef-add:hover{background:var(--accent-bg);}
+.ef-card{border:1px solid var(--border-light);border-radius:3px;padding:10px;margin-bottom:8px;background:#fafbfc;}
+.ef-card-title{font-weight:700;font-size:12px;color:var(--accent);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+.ef-sep{font-size:11px;font-weight:700;color:var(--text-dim);border-bottom:1px solid var(--border-light);padding-bottom:3px;margin:4px 0 8px;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="logo" onclick="goHome()">소설<span>위키</span></div>
+  <div class="top-search">
+    <input type="text" id="srch" placeholder="인물, 장소, 사건, 세계관 검색…" oninput="liveSearch()" onblur="setTimeout(closeSearch,200)"/>
+    <button onclick="doSearch()">검색</button>
+    <div id="srch-dropdown"></div>
+  </div>
+  <button class="top-btn pri" onclick="openModal()">+ 새 위키</button>
+  <span id="api-ind"></span>
+</div>
+
+<div id="layout">
+
+  <!-- SIDEBAR -->
+  <nav id="sidebar">
+    <div id="sb-head">
+      <span>📚 내 소설</span>
+      <button id="sb-add" onclick="openModal()">+ 추가</button>
+    </div>
+    <div id="wiki-list"><div class="sb-empty">소설을 추가해보세요</div></div>
+  </nav>
+
+  <!-- WIKI -->
+  <div id="wiki-area">
+    <div id="wiki-wrap">
+      <div class="empty-st" id="w-empty">
+        <div class="ico">📖</div>
+        <h3>위키를 선택하거나 만들어보세요</h3>
+        <p>왼쪽에서 소설을 선택하거나<br>새 위키를 만들고<br>오른쪽 입력창에 아이디어를 쏟아내세요.</p>
+      </div>
+      <div id="w-content" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- INPUT PANEL -->
+  <div id="ipanel">
+    <div id="ipanel-hd">
+      <span class="lbl">✏️ 덤프 입력</span>
+      <button id="ptoggle" onclick="togglePanel()">◀</button>
+    </div>
+    <div id="ipanel-inner">
+      <div id="api-sec">
+        <label>🔑 Gemini API 키</label>
+        <div class="api-row">
+          <input type="password" id="api-inp" placeholder="AIza…"/>
+          <button id="api-save" onclick="saveKey()">저장</button>
+        </div>
+        <div id="api-msg"></div>
+      </div>
+      <div id="dump-sec">
+        <div class="lbl2">💬 아이디어를 쏟아내세요</div>
+        <div id="dump-hint">정제 안 해도 돼요. AI가 정리해드려요.</div>
+        <textarea id="dump-ta" placeholder="예: 주인공은 기억을 잃은 여자인데 나중에 알고보니 왕국의 마지막 마녀였어. 배경은 마법이 금지된 산업혁명풍 세계고, 남주는 마법사 사냥꾼인데 나중에 연인이 돼..."></textarea>
+        <div id="proc"><div class="spin"></div><span id="proc-msg">분석 중…</span></div>
+        <div class="mode-row">
+          <button class="mchip on" data-mode="auto" onclick="setMode(this)">🔄 전체</button>
+          <button class="mchip" data-mode="character" onclick="setMode(this)">👤 인물</button>
+          <button class="mchip" data-mode="plot" onclick="setMode(this)">📖 줄거리</button>
+          <button class="mchip" data-mode="world" onclick="setMode(this)">🌍 세계관</button>
+        </div>
+        <button id="send-btn" onclick="sendDump()">정리하기 →</button>
+      </div>
+      <div id="log-sec">
+        <h4>최근 덤프</h4>
+        <div id="dump-log"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW WIKI MODAL -->
+<div id="moverlay">
+  <div id="modal">
+    <h3>새 소설 위키 만들기</h3>
+    <input type="text" id="new-name" placeholder="소설 제목"/>
+    <div class="mbtns">
+      <button class="cancel" onclick="closeModal()">취소</button>
+      <button class="confirm" onclick="createWiki()">만들기</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- EDIT MODAL -->
+<div id="eoverlay" onclick="if(event.target===this)closeEdit()">
+  <div id="emodal">
+    <div class="em-hd"><h2 id="em-title">편집</h2><button onclick="closeEdit()">✕</button></div>
+    <div class="em-body" id="em-body"></div>
+    <div class="em-ft">
+      <button class="ecancel" onclick="closeEdit()">취소</button>
+      <button class="esave" onclick="saveEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="editoverlay" onclick="if(event.target===this)closeEdit()">
+  <div id="editinner">
+    <div class="edit-hd"><h2 id="edit-title">편집</h2><button onclick="closeEdit()">✕</button></div>
+    <div class="edit-bd" id="edit-bd"></div>
+    <div class="edit-ft" id="edit-ft"></div>
+  </div>
+</div>
+
+<!-- CHAR DETAIL MODAL -->
+<div id="cdoverlay" onclick="if(event.target===this)closeCd()">
+  <div id="cdinner">
+    <div class="cd-hd"><h2 id="cd-name"></h2><button onclick="closeCd()">✕</button></div>
+    <div class="cd-bd" id="cd-bd"></div>
+  </div>
+</div>
+
+<script>
+/* STATE */
+let db = {};
+let curId = null;
+let curMode = 'auto';
+let apiKey = '';
+let panelOpen = true;
+
+const newData = () => ({summary:'',characters:[],places:[],events:[],items:[],worldbuilding:{},themes:[],timeline:[]});
+
+/* INIT */
+window.onload = () => {
+  try { db = JSON.parse(localStorage.getItem('swdb') || '{}'); } catch(e){ db={}; }
+  apiKey = localStorage.getItem('swapikey') || '';
+  if (apiKey) { document.getElementById('api-inp').value = apiKey; setApiInd(true); }
+  renderSidebar();
+};
+
+const save = () => localStorage.setItem('swdb', JSON.stringify(db));
+
+/* API KEY */
+function saveKey() {
+  apiKey = document.getElementById('api-inp').value.trim();
+  localStorage.setItem('swapikey', apiKey);
+  const m = document.getElementById('api-msg');
+  m.textContent = apiKey ? '✓ 저장됨' : '';
+  setApiInd(!!apiKey);
+  setTimeout(() => m.textContent = '', 2000);
+}
+function setApiInd(ok) {
+  document.getElementById('api-ind').textContent = ok ? '🔑 연결됨' : '';
+}
+
+/* PANEL */
+function togglePanel() {
+  panelOpen = !panelOpen;
+  document.getElementById('ipanel').classList.toggle('collapsed', !panelOpen);
+  document.getElementById('ptoggle').textContent = panelOpen ? '◀' : '▶';
+}
+
+/* WIKI CRUD */
+function openModal() { document.getElementById('new-name').value=''; document.getElementById('moverlay').classList.add('show'); setTimeout(()=>document.getElementById('new-name').focus(),50); }
+function closeModal() { document.getElementById('moverlay').classList.remove('show'); }
+function createWiki() {
+  const name = document.getElementById('new-name').value.trim();
+  if (!name) return;
+  const id = 'w'+Date.now();
+  db[id] = { title: name, data: newData(), dumps: [] };
+  save(); closeModal(); renderSidebar(); selectWiki(id);
+}
+function selectWiki(id) { curId = id; renderSidebar(); renderWiki(); }
+function delWiki(id, e) {
+  e.stopPropagation();
+  if (!confirm(`"${db[id].title}" 위키를 삭제할까요?`)) return;
+  delete db[id];
+  if (curId === id) { curId = null; document.getElementById('w-empty').style.display=''; document.getElementById('w-content').style.display='none'; }
+  save(); renderSidebar();
+}
+
+/* SIDEBAR */
+function renderSidebar() {
+  const list = document.getElementById('wiki-list');
+  const ids = Object.keys(db);
+  if (!ids.length) { list.innerHTML='<div class="sb-empty">소설을 추가해보세요</div>'; return; }
+  list.innerHTML = ids.map(id => `
+    <div class="wi ${id===curId?'active':''}" onclick="selectWiki('${id}')">
+      <span class="wi-name">📖 ${esc(db[id].title)}</span>
+      <button class="wi-del" onclick="delWiki('${id}',event)">×</button>
+    </div>`).join('');
+}
+
+/* ── RENDER WIKI (NAMU STYLE) ── */
+function renderWiki() {
+  if (!curId || !db[curId]) return;
+  const wiki = db[curId];
+  const d = wiki.data;
+  document.getElementById('w-empty').style.display = 'none';
+  const wc = document.getElementById('w-content');
+  wc.style.display = '';
+
+  const secs = buildSections(d);
+  let html = `
+    <div class="page-title">${esc(wiki.title)}</div>
+    <div class="page-meta">
+      <span>👤 인물 ${d.characters.length}명</span>
+      <span>🗺️ 장소 ${d.places.length}곳</span>
+      <span>📅 사건 ${d.events.length}건</span>
+      <span>🔄 덤프 ${wiki.dumps.length}회</span>
+    </div>`;
+
+  if (!d.summary && !d.characters.length) {
+    html += `<p style="color:var(--text-dim);font-size:13px;margin-top:8px">오른쪽 입력창에 아이디어를 쏟아내면 여기에 정리됩니다.</p>`;
+  }
+
+  if (secs.length) html += buildTOC(secs);
+  secs.forEach((s,i) => { html += renderSec(s, i+1); });
+  wc.innerHTML = html;
+  renderLog();
+}
+
+function buildSections(d) {
+  const s = [];
+  if (d.summary) s.push({title:'개요', key:'overview', body:secOverview(d)});
+  if (d.characters.length) s.push({title:'등장인물', key:'characters', body:secChars(d.characters)});
+  if (d.places.length) s.push({title:'장소', key:'places', body:secPlaces(d.places)});
+  if (d.events.length) s.push({title:'사건', key:'events', body:secEvents(d.events)});
+  if (d.items.length) s.push({title:'물건 / 아이템', key:'items', body:secItems(d.items)});
+  const wb = d.worldbuilding || {};
+  if (Object.values(wb).some(v=>v&&(Array.isArray(v)?v.length:true))) s.push({title:'세계관 설정', key:'worldbuilding', body:secWorld(wb)});
+  if (d.themes.length) s.push({title:'주제 / 테마', key:'themes', body:secThemes(d.themes)});
+  if (d.timeline.length) s.push({title:'타임라인', key:'timeline', body:secTimeline(d.timeline)});
+  return s;
+}
+
+function buildTOC(secs) {
+  return `<div class="toc-box">
+    <div class="toc-hd">목차 <button onclick="toggleTOC(this)">접기</button></div>
+    <div class="toc-bd" id="toc-bd"><ol>${secs.map((s,i)=>`<li><a href="#sec${i+1}">${i+1}. ${esc(s.title)}</a></li>`).join('')}</ol></div>
+  </div>`;
+}
+function toggleTOC(btn) {
+  const bd = document.getElementById('toc-bd');
+  const hide = bd.style.display==='none';
+  bd.style.display = hide ? '' : 'none';
+  btn.textContent = hide ? '접기' : '펼치기';
+}
+
+function renderSec(sec, n) {
+  return `<div class="wsec" id="sec${n}">
+    <div class="wsec-hd" onclick="toggleSec(this)">
+      <i class="wsec-arr">∨</i>&nbsp;
+      <span class="wsec-num">${n}.</span>
+      <span class="wsec-title">${esc(sec.title)}</span>
+      <button class="wsec-edit" onclick="event.stopPropagation();openEdit('${sec.key}')">편집</button>
+    </div>
+    <div class="wsec-body">${sec.body}</div>
+  </div>`;
+}
+function toggleSec(hd) {
+  const body = hd.nextElementSibling;
+  const arr = hd.querySelector('.wsec-arr');
+  const hide = !body.classList.contains('hide');
+  body.classList.toggle('hide', hide);
+  arr.textContent = hide ? '›' : '∨';
+}
+
+/* SECTION BODIES */
+function secOverview(d) {
+  let h = `<p class="wp">${esc(d.summary)}</p>`;
+  if (d.themes.length) h += `<p class="wp">${d.themes.map(t=>`<span class="wtag">${esc(t)}</span>`).join('')}</p>`;
+  return h;
+}
+function secChars(chars) {
+  return `<div class="cgrid">${chars.map((c,i)=>`
+    <div class="ccard" onclick="showCd('${esc(c.name)}')">
+      <div class="cn">${esc(c.name)} <button style="float:right;background:none;border:none;font-size:11px;color:var(--edit);cursor:pointer;padding:0 2px" onclick="openEditItem('characters',${i},event)">편집</button></div>
+      <div class="cr">${[c.role,c.gender,c.age].filter(Boolean).map(esc).join(' · ')}</div>
+      <div class="cd">${esc(c.personality||c.background||c.goal||'')}</div>
+    </div>`).join('')}</div>`;
+}
+function secPlaces(places) {
+  return places.map((p,i)=>`
+    <div class="wssec">
+      <div class="wssec-hd"><span class="wssec-num">▸</span><span class="wssec-title">${esc(p.name)}</span>${p.type?`<span class="wtag" style="font-size:11px">${esc(p.type)}</span>`:''}<button style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:2px;font-size:11px;color:var(--edit);cursor:pointer;padding:1px 7px;font-family:inherit" onclick="openEditItem('places',${i},event)">편집</button></div>
+      ${p.description?`<p class="wp">${esc(p.description)}</p>`:''}
+      ${p.significance?`<p class="wp" style="color:var(--text-sub)">→ ${esc(p.significance)}</p>`:''}
+    </div>`).join('');
+}
+function secEvents(events) {
+  return events.map((ev,i)=>`
+    <div class="wssec">
+      <div class="wssec-hd"><span class="wssec-num">▸</span><span class="wssec-title">${esc(ev.title)}</span>${ev.when?`<span style="font-size:12px;color:var(--text-dim);margin-left:6px">${esc(ev.when)}</span>`:''}<button style="margin-left:auto;background:none;border:1px solid var(--border);border-radius:2px;font-size:11px;color:var(--edit);cursor:pointer;padding:1px 7px;font-family:inherit" onclick="openEditItem('events',${i},event)">편집</button></div>
+      ${ev.who?.length?`<p class="wp" style="font-size:13px;color:var(--text-sub)">관련 인물: ${ev.who.map(w=>`<span class="wlink" onclick="showCd('${esc(w)}')">${esc(w)}</span>`).join(', ')}</p>`:''}
+      ${ev.what?`<p class="wp">${esc(ev.what)}</p>`:''}
+      ${ev.impact?`<p class="wp" style="color:var(--text-sub)">→ 영향: ${esc(ev.impact)}</p>`:''}
+    </div>`).join('');
+}
+function secItems(items) {
+  return `<ul class="wul">${items.map((it,i)=>`
+    <li><strong>${esc(it.name)}</strong>${it.type?` (${esc(it.type)})`:''}${it.owner?` — ${esc(it.owner)} 소유`:''}${it.description?`: ${esc(it.description)}`:''}${it.significance?` <span style="color:var(--text-sub)">[${esc(it.significance)}]</span>`:''} <button style="background:none;border:none;font-size:11px;color:var(--edit);cursor:pointer" onclick="openEditItem('items',${i},event)">편집</button></li>`).join('')}</ul>`;
+}
+function secWorld(wb) {
+  let h = '';
+  [['시대 / 배경',wb.era],['배경 설명',wb.setting],['마법 / 시스템',wb.magic],['사회 구조',wb.society],['역사',wb.history],['분위기',wb.atmosphere]]
+    .filter(r=>r[1]).forEach(r=>{
+      h+=`<div class="wssec"><div class="wssec-hd"><span class="wssec-num">▸</span><span class="wssec-title">${r[0]}</span></div><p class="wp">${esc(r[1])}</p></div>`;
+    });
+  if (wb.rules?.length) h+=`<div class="wssec"><div class="wssec-hd"><span class="wssec-num">▸</span><span class="wssec-title">세계의 규칙</span></div><ul class="wul">${wb.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ul></div>`;
+  return h || '<p class="wp" style="color:var(--text-dim)">세계관 정보 없음</p>';
+}
+function secThemes(themes) {
+  return `<p class="wp">${themes.map(t=>`<span class="wtag" style="font-size:13px;padding:3px 10px">${esc(t)}</span>`).join('')}</p>`;
+}
+function secTimeline(tl) {
+  return `<div class="tl-wrap">${tl.map((t,i)=>`
+    <div class="tl-item"><div class="tl-dot"></div>
+    ${t.label?`<div class="tl-when">${esc(t.label)} <button style="background:none;border:none;font-size:11px;color:var(--edit);cursor:pointer" onclick="openEditItem('timeline',${i},event)">편집</button></div>`:''}
+    <div class="tl-text">${esc(t.event)}</div></div>`).join('')}</div>`;
+}
+
+/* CHAR DETAIL */
+function showCd(name) {
+  if (!curId) return;
+  const c = db[curId].data.characters.find(ch=>ch.name===name);
+  if (!c) return;
+  document.getElementById('cd-name').textContent = c.name;
+  const rows = [
+    ['역할',c.role],['성별',c.gender],['나이',c.age],
+    ['외모',c.appearance],['성격',c.personality],['배경',c.background],
+    ['목표',c.goal],
+    ['비밀', c.secret ? `<span class="spoiler" onclick="this.classList.toggle('open')">${esc(c.secret)}</span>` : ''],
+    ['관계', c.relations?.length ? c.relations.map(esc).join('<br>') : ''],
+  ].filter(r=>r[1]);
+  document.getElementById('cd-bd').innerHTML = rows.map(r=>`
+    <div class="cd-row"><div class="cd-k">${r[0]}</div><div class="cd-v">${r[1]}</div></div>`).join('');
+  document.getElementById('cdoverlay').classList.add('show');
+}
+function closeCd() { document.getElementById('cdoverlay').classList.remove('show'); }
+
+/* DUMP LOG */
+function renderLog() {
+  if (!curId) return;
+  const dumps = db[curId].dumps;
+  const el = document.getElementById('dump-log');
+  if (!dumps.length) { el.innerHTML='<div style="font-size:11px;color:var(--text-dim)">아직 없어요</div>'; return; }
+  el.innerHTML = dumps.slice(0,5).map(d=>`
+    <div class="log-row"><span class="log-txt">${esc(d.text)}</span><span style="white-space:nowrap">${d.date}</span></div>`).join('');
+}
+
+/* MODE */
+function setMode(btn) {
+  document.querySelectorAll('.mchip').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  curMode = btn.dataset.mode;
+}
+
+/* GEMINI */
+async function callGemini(prompt) {
+  if (!apiKey) throw new Error('API 키를 먼저 저장해주세요.');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+  const res = await fetch(url, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      contents:[{parts:[{text:prompt}]}],
+      generationConfig:{temperature:0.2,maxOutputTokens:4096}
+    })
+  });
+  if (!res.ok) { const e=await res.json(); throw new Error(e.error?.message||`HTTP ${res.status}`); }
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+function buildPrompt(text, mode, existing) {
+  const ex = JSON.stringify({
+    summary: existing.summary,
+    characters: existing.characters.map(c=>({name:c.name,role:c.role})),
+    places: existing.places.map(p=>p.name),
+    events: existing.events.map(e=>e.title),
+  });
+  const schemas = {
+    auto:`{
+  "summary": "전체 줄거리 요약 (300자 이내, 작가가 말한 것만)",
+  "characters": [{"name":"","role":"주인공/조연 등","gender":"","age":"","appearance":"","personality":"","background":"","goal":"","secret":"","relations":[],"tags":[]}],
+  "places": [{"name":"","type":"","description":"","significance":""}],
+  "events": [{"title":"","when":"","who":[],"what":"","impact":""}],
+  "items": [{"name":"","type":"","description":"","owner":"","significance":""}],
+  "worldbuilding": {"era":"","setting":"","rules":[],"magic":"","society":"","history":"","atmosphere":""},
+  "themes": [],
+  "timeline": [{"order":1,"label":"","event":""}]
+}`,
+    character:`{"characters":[{"name":"","role":"","gender":"","age":"","appearance":"","personality":"","background":"","goal":"","secret":"","relations":[],"tags":[]}]}`,
+    plot:`{"summary":"","events":[{"title":"","when":"","who":[],"what":"","impact":""}],"timeline":[{"order":1,"label":"","event":""}]}`,
+    world:`{"worldbuilding":{"era":"","setting":"","rules":[],"magic":"","society":"","history":"","atmosphere":""},"places":[{"name":"","type":"","description":"","significance":""}]}`,
+  };
+  return `당신은 소설 작가의 아이디어를 정리하는 어시스턴트입니다.
+규칙:
+1. 작가가 말한 것만 정리하세요. 새 내용을 절대 창작하지 마세요.
+2. 기존 데이터와 합쳐서 업데이트하세요.
+3. 없는 정보는 빈 문자열/빈 배열로 두세요.
+4. JSON만 출력하세요. 마크다운 코드블록 없이.
+
+기존 데이터: ${ex}
+
+새 덤프:
+"""
+${text}
+"""
+
+스키마:
+${schemas[mode]||schemas.auto}`;
+}
+
+async function sendDump() {
+  if (!curId) { alert('먼저 왼쪽에서 소설 위키를 선택하세요.'); return; }
+  const text = document.getElementById('dump-ta').value.trim();
+  if (!text) return;
+  if (!apiKey) { alert('API 키를 먼저 저장해주세요.'); return; }
+
+  const btn = document.getElementById('send-btn');
+  const proc = document.getElementById('proc');
+  const msg = document.getElementById('proc-msg');
+  btn.disabled = true; proc.classList.add('show');
+
+  try {
+    msg.textContent = 'Gemini 분석 중…';
+    const prompt = buildPrompt(text, curMode, db[curId].data);
+    const raw = await callGemini(prompt);
+    msg.textContent = '위키 업데이트 중…';
+    let clean = raw.trim().replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/```\s*$/,'');
+    mergeData(db[curId].data, JSON.parse(clean));
+    db[curId].dumps.unshift({
+      text: text.slice(0,40),
+      date: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})
+    });
+    save();
+    document.getElementById('dump-ta').value = '';
+    renderWiki();
+  } catch(e) {
+    alert(`오류: ${e.message}`);
+  }
+  proc.classList.remove('show'); btn.disabled = false;
+}
+
+function mergeData(t, p) {
+  if (p.summary) t.summary = p.summary;
+  if (p.themes?.length) p.themes.forEach(th=>{ if(!t.themes.includes(th)) t.themes.push(th); });
+  ['characters','places','events','items'].forEach(key => {
+    const nameKey = key==='events' ? 'title' : 'name';
+    if (p[key]?.length) p[key].forEach(np => {
+      if (!np[nameKey]) return;
+      const i = t[key].findIndex(x=>x[nameKey]===np[nameKey]);
+      const merged = {};
+      Object.keys(np).forEach(k=>{ if(np[k]!==''&&np[k]!==null&&!(Array.isArray(np[k])&&!np[k].length)) merged[k]=np[k]; });
+      if (i>=0) t[key][i]={...t[key][i],...merged};
+      else t[key].push({...np});
+    });
+  });
+  if (p.worldbuilding) { const wb=p.worldbuilding; Object.keys(wb).forEach(k=>{ if(wb[k]&&!(Array.isArray(wb[k])&&!wb[k].length)) t.worldbuilding[k]=wb[k]; }); }
+  if (p.timeline?.length) {
+    p.timeline.forEach(nt=>{ if(!t.timeline.find(x=>x.event===nt.event)) t.timeline.push(nt); });
+    t.timeline.sort((a,b)=>(a.order||0)-(b.order||0));
+  }
+}
+
+/* ═══════════════════════════════════════════
+   EDIT FUNCTIONS
+═══════════════════════════════════════════ */
+let editKey = null;
+let editIdx = null; // for array items
+
+function openEdit(key, idx) {
+  if (!curId) return;
+  // 목록형 섹션인데 idx가 없으면 → 첫 번째 항목 or 선택 UI
+  const listKeys = ['characters','places','events','items','timeline'];
+  if (listKeys.includes(key) && idx === undefined) {
+    const arr = db[curId].data[key];
+    if (!arr.length) return;
+    if (arr.length === 1) { openEdit(key, 0); return; }
+    // 선택 팝업
+    const nameKey = key==='events'?'title':key==='timeline'?'event':'name';
+    const bd = document.getElementById('edit-bd');
+    const ft = document.getElementById('edit-ft');
+    document.getElementById('edit-title').textContent = '편집할 항목 선택';
+    bd.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px">${arr.map((item,i)=>`
+      <button onclick="openEdit('${key}',${i})" style="text-align:left;padding:9px 12px;border:1px solid var(--border);border-radius:3px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;color:var(--text)">
+        ${esc(key==='timeline'?item.label||item.event.slice(0,30):item[nameKey])}
+      </button>`).join('')}</div>`;
+    ft.innerHTML = `<button class="cancel" onclick="closeEdit()">취소</button>`;
+    document.getElementById('editoverlay').classList.add('show');
+    return;
+  }
+
+  editKey = key; editIdx = idx ?? null;
+  const d = db[curId].data;
+  const bd = document.getElementById('edit-bd');
+  const ft = document.getElementById('edit-ft');
+  const title = document.getElementById('edit-title');
+
+  let fields = '';
+  let footerExtra = '';
+
+  if (key === 'overview') {
+    title.textContent = '개요 편집';
+    fields = field('summary', '줄거리 요약', d.summary, 'textarea', 5) +
+             field('themes', '주제 / 테마 (쉼표로 구분)', d.themes.join(', '), 'input');
+  } else if (key === 'characters') {
+    const c = d.characters[idx];
+    title.textContent = `인물 편집 — ${c.name}`;
+    fields = field('name','이름',c.name,'input') + field('role','역할',c.role,'input') +
+             field('gender','성별',c.gender,'input') + field('age','나이',c.age,'input') +
+             field('appearance','외모',c.appearance,'textarea',2) +
+             field('personality','성격',c.personality,'textarea',2) +
+             field('background','배경',c.background,'textarea',3) +
+             field('goal','목표',c.goal,'textarea',2) +
+             field('secret','비밀',c.secret,'textarea',2) +
+             field('relations','관계 (줄바꿈으로 구분)',c.relations?.join('\n'),'textarea',3) +
+             field('tags','태그 (쉼표로 구분)',c.tags?.join(', '),'input');
+    footerExtra = `<button class="del" onclick="deleteItem('characters',${idx})">🗑 삭제</button>`;
+  } else if (key === 'places') {
+    const p = d.places[idx];
+    title.textContent = `장소 편집 — ${p.name}`;
+    fields = field('name','장소명',p.name,'input') + field('type','종류',p.type,'input') +
+             field('description','설명',p.description,'textarea',3) +
+             field('significance','의미',p.significance,'textarea',2);
+    footerExtra = `<button class="del" onclick="deleteItem('places',${idx})">🗑 삭제</button>`;
+  } else if (key === 'events') {
+    const ev = d.events[idx];
+    title.textContent = `사건 편집 — ${ev.title}`;
+    fields = field('title','사건명',ev.title,'input') + field('when','시점',ev.when,'input') +
+             field('who','관련 인물 (쉼표로 구분)',ev.who?.join(', '),'input') +
+             field('what','내용',ev.what,'textarea',3) +
+             field('impact','영향',ev.impact,'textarea',2);
+    footerExtra = `<button class="del" onclick="deleteItem('events',${idx})">🗑 삭제</button>`;
+  } else if (key === 'items') {
+    const it = d.items[idx];
+    title.textContent = `아이템 편집 — ${it.name}`;
+    fields = field('name','이름',it.name,'input') + field('type','종류',it.type,'input') +
+             field('owner','소유자',it.owner,'input') +
+             field('description','설명',it.description,'textarea',2) +
+             field('significance','의미',it.significance,'textarea',2);
+    footerExtra = `<button class="del" onclick="deleteItem('items',${idx})">🗑 삭제</button>`;
+  } else if (key === 'worldbuilding') {
+    title.textContent = '세계관 설정 편집';
+    const wb = d.worldbuilding;
+    fields = field('era','시대 / 배경',wb.era,'input') +
+             field('setting','배경 설명',wb.setting,'textarea',3) +
+             field('magic','마법 / 시스템',wb.magic,'textarea',2) +
+             field('society','사회 구조',wb.society,'textarea',2) +
+             field('history','역사',wb.history,'textarea',2) +
+             field('atmosphere','분위기',wb.atmosphere,'input') +
+             field('rules','세계의 규칙 (줄바꿈으로 구분)',wb.rules?.join('\n'),'textarea',3);
+  } else if (key === 'themes') {
+    title.textContent = '주제 / 테마 편집';
+    fields = field('themes','주제 (쉼표로 구분)',d.themes.join(', '),'textarea',3);
+  } else if (key === 'timeline') {
+    const tl = d.timeline[idx];
+    title.textContent = `타임라인 편집`;
+    fields = field('label','시점 레이블',tl.label,'input') +
+             field('event','내용',tl.event,'textarea',3) +
+             field('order','순서 번호',String(tl.order||''),'input');
+    footerExtra = `<button class="del" onclick="deleteItem('timeline',${idx})">🗑 삭제</button>`;
+  }
+
+  bd.innerHTML = fields;
+  ft.innerHTML = `${footerExtra}<button class="cancel" onclick="closeEdit()">취소</button><button class="save" onclick="saveEdit()">저장</button>`;
+  document.getElementById('editoverlay').classList.add('show');
+}
+
+function field(name, label, val, type, rows) {
+  const v = val || '';
+  if (type === 'textarea') {
+    return `<div class="edit-field"><label>${label}</label><textarea data-field="${name}" rows="${rows||3}">${esc(v)}</textarea></div>`;
+  }
+  return `<div class="edit-field"><label>${label}</label><input type="text" data-field="${name}" value="${esc(v)}"/></div>`;
+}
+
+function closeEdit() { document.getElementById('editoverlay').classList.remove('show'); editKey=null; editIdx=null; }
+
+function saveEdit() {
+  const d = db[curId].data;
+  const inputs = document.querySelectorAll('#edit-bd [data-field]');
+  const vals = {};
+  inputs.forEach(el => { vals[el.dataset.field] = el.value; });
+
+  if (editKey === 'overview') {
+    d.summary = vals.summary;
+    d.themes = vals.themes ? vals.themes.split(',').map(s=>s.trim()).filter(Boolean) : [];
+  } else if (editKey === 'characters') {
+    const c = d.characters[editIdx];
+    Object.assign(c, {
+      name:vals.name, role:vals.role, gender:vals.gender, age:vals.age,
+      appearance:vals.appearance, personality:vals.personality,
+      background:vals.background, goal:vals.goal, secret:vals.secret,
+      relations: vals.relations ? vals.relations.split('\n').map(s=>s.trim()).filter(Boolean) : [],
+      tags: vals.tags ? vals.tags.split(',').map(s=>s.trim()).filter(Boolean) : [],
+    });
+  } else if (editKey === 'places') {
+    Object.assign(d.places[editIdx], {name:vals.name,type:vals.type,description:vals.description,significance:vals.significance});
+  } else if (editKey === 'events') {
+    Object.assign(d.events[editIdx], {
+      title:vals.title, when:vals.when,
+      who: vals.who ? vals.who.split(',').map(s=>s.trim()).filter(Boolean) : [],
+      what:vals.what, impact:vals.impact
+    });
+  } else if (editKey === 'items') {
+    Object.assign(d.items[editIdx], {name:vals.name,type:vals.type,owner:vals.owner,description:vals.description,significance:vals.significance});
+  } else if (editKey === 'worldbuilding') {
+    Object.assign(d.worldbuilding, {
+      era:vals.era, setting:vals.setting, magic:vals.magic,
+      society:vals.society, history:vals.history, atmosphere:vals.atmosphere,
+      rules: vals.rules ? vals.rules.split('\n').map(s=>s.trim()).filter(Boolean) : [],
+    });
+  } else if (editKey === 'themes') {
+    d.themes = vals.themes ? vals.themes.split(',').map(s=>s.trim()).filter(Boolean) : [];
+  } else if (editKey === 'timeline') {
+    Object.assign(d.timeline[editIdx], {label:vals.label, event:vals.event, order:parseInt(vals.order)||editIdx+1});
+    d.timeline.sort((a,b)=>(a.order||0)-(b.order||0));
+  }
+
+  save(); closeEdit(); renderWiki();
+}
+
+function deleteItem(key, idx) {
+  if (!confirm('삭제할까요?')) return;
+  db[curId].data[key].splice(idx, 1);
+  save(); closeEdit(); renderWiki();
+}
+
+// 섹션 내 개별 항목 편집 — 인물/장소/사건/아이템/타임라인 카드에서 호출
+function openEditItem(key, idx, e) {
+  if (e) e.stopPropagation();
+  openEdit(key, idx);
+}
+
+/* ═══════════════════════════════════════════
+   SEARCH
+═══════════════════════════════════════════ */
+function liveSearch() {
+  const q = document.getElementById('srch').value.trim().toLowerCase();
+  const dd = document.getElementById('srch-dropdown');
+  if (!q || !curId) { dd.classList.remove('show'); return; }
+
+  const d = db[curId].data;
+  const results = [];
+
+  // 인물
+  d.characters.forEach((c, i) => {
+    if ([c.name, c.role, c.personality, c.background, c.goal].some(v => v?.toLowerCase().includes(q)))
+      results.push({ group:'👤 인물', name: c.name, desc: c.role||c.personality||'', action: () => jumpToSection('characters', i) });
+  });
+  // 장소
+  d.places.forEach((p, i) => {
+    if ([p.name, p.type, p.description].some(v => v?.toLowerCase().includes(q)))
+      results.push({ group:'🗺️ 장소', name: p.name, desc: p.type||p.description||'', action: () => jumpToSection('places', i) });
+  });
+  // 사건
+  d.events.forEach((ev, i) => {
+    if ([ev.title, ev.what, ev.impact].some(v => v?.toLowerCase().includes(q)))
+      results.push({ group:'📅 사건', name: ev.title, desc: ev.when||ev.what?.slice(0,30)||'', action: () => jumpToSection('events', i) });
+  });
+  // 아이템
+  d.items.forEach((it, i) => {
+    if ([it.name, it.type, it.description].some(v => v?.toLowerCase().includes(q)))
+      results.push({ group:'💎 아이템', name: it.name, desc: it.type||it.description||'', action: () => jumpToSection('items', i) });
+  });
+  // 세계관
+  const wb = d.worldbuilding || {};
+  const wbText = [wb.era, wb.setting, wb.magic, wb.society, wb.history, wb.atmosphere, ...(wb.rules||[])].filter(Boolean).join(' ');
+  if (wbText.toLowerCase().includes(q))
+    results.push({ group:'🌍 세계관', name: '세계관 설정', desc: wb.setting?.slice(0,30)||wb.era||'', action: () => jumpToSection('worldbuilding') });
+
+  if (!results.length) {
+    dd.innerHTML = `<div class="sd-empty">검색 결과가 없어요</div>`;
+    dd.classList.add('show');
+    return;
+  }
+
+  // 그룹별로 묶기
+  const groups = {};
+  results.forEach(r => {
+    if (!groups[r.group]) groups[r.group] = [];
+    groups[r.group].push(r);
+  });
+
+  dd.innerHTML = Object.entries(groups).map(([label, items]) => `
+    <div class="sd-group">
+      <div class="sd-group-label">${label}</div>
+      ${items.map((item, idx) => `
+        <div class="sd-item" onclick="(${item.action.toString()})(); closeSearch()">
+          <span class="sd-name">${esc(item.name)}</span>
+          <span class="sd-desc">${esc(item.desc)}</span>
+        </div>`).join('')}
+    </div>`).join('');
+  dd.classList.add('show');
+}
+
+function doSearch() {
+  liveSearch();
+}
+
+function closeSearch() {
+  document.getElementById('srch-dropdown').classList.remove('show');
+}
+
+function jumpToSection(key, itemIdx) {
+  // 섹션 번호 찾기
+  const d = db[curId].data;
+  const order = ['overview','characters','places','events','items','worldbuilding','themes','timeline'];
+  const keyMap = {
+    overview: ()=>!!d.summary,
+    characters: ()=>d.characters.length,
+    places: ()=>d.places.length,
+    events: ()=>d.events.length,
+    items: ()=>d.items.length,
+    worldbuilding: ()=>Object.values(d.worldbuilding||{}).some(v=>v&&(Array.isArray(v)?v.length:true)),
+    themes: ()=>d.themes.length,
+    timeline: ()=>d.timeline.length,
+  };
+  let secNum = 0;
+  for (const k of order) {
+    if (keyMap[k]?.()) secNum++;
+    if (k === key) break;
+  }
+  const secEl = document.getElementById(`sec${secNum}`);
+  if (!secEl) return;
+  // 섹션이 접혀 있으면 열기
+  const body = secEl.querySelector('.wsec-body');
+  const arr = secEl.querySelector('.wsec-arr');
+  if (body?.classList.contains('hide')) { body.classList.remove('hide'); if(arr) arr.textContent='∨'; }
+  secEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // 잠깐 하이라이트
+  secEl.style.outline = '2px solid var(--accent)';
+  setTimeout(() => secEl.style.outline = '', 1500);
+  document.getElementById('srch').value = '';
+}
+
+/* UTIL */
+function goHome() { curId=null; renderSidebar(); document.getElementById('w-empty').style.display=''; document.getElementById('w-content').style.display='none'; }
+function esc(s) { if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* 한국어 IME 조합 중 Enter 오작동 방지 */
+let _composing = false;
+function _addIMEEnter(id, fn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('compositionstart', () => { _composing = true; });
+  el.addEventListener('compositionend',   () => { _composing = false; });
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' && !_composing) fn(); });
+}
+window.addEventListener('DOMContentLoaded', () => {
+  _addIMEEnter('srch', doSearch);
+  _addIMEEnter('new-name', createWiki);
+});
+</script>
+</body>
+</html>
